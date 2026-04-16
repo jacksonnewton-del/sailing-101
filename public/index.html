@@ -925,14 +925,24 @@
 
         // Handle input
         const keys = {};
+        const gameKeys = new Set(['arrowleft', 'arrowright', 'arrowup', 'arrowdown', ' ']);
         window.addEventListener('keydown', (e) => {
-            keys[e.key.toLowerCase()] = true;
+            const key = e.key.toLowerCase();
+            // Prevent browser from scrolling when game is active
+            if (gameState.gameActive && gameKeys.has(key)) {
+                e.preventDefault();
+            }
+            keys[key] = true;
             if (e.key === 'q' || e.key === 'Q') {
                 showQuestionOverlay();
             }
         });
         window.addEventListener('keyup', (e) => {
-            keys[e.key.toLowerCase()] = false;
+            const key = e.key.toLowerCase();
+            if (gameState.gameActive && gameKeys.has(key)) {
+                e.preventDefault();
+            }
+            keys[key] = false;
         });
 
         function handleMovement() {
