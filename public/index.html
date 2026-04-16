@@ -753,6 +753,7 @@
         <div class="hud-center">
             Press <strong>Q</strong> for questions | <strong>Arrows</strong> to move | <strong>Space/Up</strong> to jump
         </div>
+        <div id="debugPanel" style="position:fixed; bottom:60px; left:10px; background:rgba(0,0,0,0.8); color:#0f0; font-family:monospace; font-size:12px; padding:10px; border-radius:5px; z-index:9999; max-width:300px;"></div>
     </div>
 
     <!-- Question Overlay -->
@@ -933,24 +934,31 @@
         // Handle input
         const keys = {};
         const gameKeys = new Set(['arrowleft', 'arrowright', 'arrowup', 'arrowdown', ' ']);
-        window.addEventListener('keydown', (e) => {
+        let lastKeyPressed = 'none';
+        let keyEventCount = 0;
+
+        document.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
+            lastKeyPressed = e.key;
+            keyEventCount++;
             // Prevent browser from scrolling when game is active
-            if (gameState.gameActive && gameKeys.has(key)) {
+            if (gameKeys.has(key)) {
                 e.preventDefault();
+                e.stopPropagation();
             }
             keys[key] = true;
-            if (e.key === 'q' || e.key === 'Q') {
+            if (key === 'q') {
                 showQuestionOverlay();
             }
-        });
-        window.addEventListener('keyup', (e) => {
+        }, true);
+        document.addEventListener('keyup', (e) => {
             const key = e.key.toLowerCase();
-            if (gameState.gameActive && gameKeys.has(key)) {
+            if (gameKeys.has(key)) {
                 e.preventDefault();
+                e.stopPropagation();
             }
             keys[key] = false;
-        });
+        }, true);
 
         function handleMovement() {
             const player = gameState.localPlayer;
@@ -1072,17 +1080,45 @@
             }
         }
 
+        let frameCount = 0;
+
         // Game loop
         function gameLoop() {
-            handleMovement();
-            updateLocalPlayer();
-            updateRemotePlayerInterpolation();
-            render();
-            updateHUD();
+            try {
+                frameCount++;
+                handleMovement();
+                updateLocalPlayer();
+                updateRemotePlayerInterpolation();
+                render();
+                updateHUD();
 
-            // Send position to server ~15fps
-            if (gameState.gameActive && gameState.localPlayer) {
-                sendPlayerUpdate();
+                // Debug panel
+                const p = gameState.localPlayer;
+                const dbg = document.getElementById('debugPanel');
+                if (dbg) {
+                    dbg.innerHTML = `
+                        Frame: ${frameCount}<br>
+                        Player: ${p ? 'YES' : 'NULL'}<br>
+                        Active: ${gameState.gameActive}<br>
+                        ${p ? `X: ${Math.round(p.x)} Y: ${Math.round(p.y)}<br>
+                        VelX: ${p.velocityX} VelY: ${Math.round(p.velocityY * 10) / 10}<br>
+                        Energy: ${p.energy}<br>
+                        Jumping: ${p.isJumping}` : ''}<br>
+                        Keys: ${keyEventCount} Last: ${lastKeyPressed}<br>
+                        Left:${!!keys['arrowleft']} Right:${!!keys['arrowright']}<br>
+                        Up:${!!keys['arrowup']} Space:${!!keys[' ']}<br>
+                        Platforms: ${platforms.length}
+                    `;
+                }
+
+                // Send position to server ~15fps
+                if (gameState.gameActive && gameState.localPlayer) {
+                    sendPlayerUpdate();
+                }
+            } catch (err) {
+                console.error('Game loop error:', err);
+                const dbg = document.getElementById('debugPanel');
+                if (dbg) dbg.innerHTML = '<span style="color:red">ERROR: ' + err.message + '</span>';
             }
 
             gameLoopId = requestAnimationFrame(gameLoop);
@@ -1502,7 +1538,10 @@
 
             if (isCorrect) {
                 buttonEl.classList.add('correct');
-                gameState.localPlayer.energy = Math.min(gameState.localPlayer.energy + 10, 30);
+                if (gameState.localPlayer) {
+                    gameState.localPlayer.energy = Math.min(gameState.localPlayer.energy + 10, 30);
+                    console.log('Correct! Energy now:', gameState.localPlayer.energy);
+                }
 
                 if (gameState.ws && gameState.ws.readyState === WebSocket.OPEN) {
                     gameState.ws.send(JSON.stringify({
@@ -1512,6 +1551,7 @@
                 }
             } else {
                 buttonEl.classList.add('wrong');
+                console.log('Wrong. Correct answer was:', currentQuestion.answer);
             }
 
             clearInterval(questionTimerInterval);
