@@ -649,9 +649,16 @@
         </div>
 
         <div id="mainMenu" style="display:block;">
+            <!-- Solo Practice -->
+            <div class="lobby-section">
+                <h2>Quick Play</h2>
+                <button class="btn-primary" onclick="startSoloMode()" style="background: linear-gradient(135deg, #4ECDC4 0%, #45B7D1 100%); width: 100%; font-size: 1.1em; padding: 15px;">⛵ Solo Practice</button>
+                <p style="font-size: 0.85em; color: #888; margin-top: 8px; text-align: center;">Test the game by yourself — no room needed</p>
+            </div>
+
             <!-- Create Room -->
             <div class="lobby-section">
-                <h2>New Game</h2>
+                <h2>Multiplayer</h2>
                 <button class="btn-primary" onclick="createRoom()">Create Room</button>
                 <div id="roomCodeDisplay" style="display:none; margin-top: 15px;">
                     <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Your Room Code:</p>
@@ -1515,6 +1522,30 @@
             document.getElementById('questionOverlay').classList.remove('active');
         }
 
+        // ==================== SOLO MODE ====================
+        function startSoloMode() {
+            gameState.localPlayerId = 'solo_player';
+            gameState.gameActive = true;
+            const seed = Math.floor(Math.random() * 1000000);
+            startGameMode(300, seed); // 5 minute solo game
+
+            // Run our own timer for solo mode (no server)
+            const soloTimer = setInterval(() => {
+                gameState.gameTimer--;
+                updateGameTimer();
+                if (gameState.gameTimer <= 0) {
+                    clearInterval(soloTimer);
+                    gameState.gameActive = false;
+                    const standings = [{
+                        name: 'You',
+                        heightReached: gameState.localPlayer ? gameState.localPlayer.heightReached : 0,
+                        energy: gameState.localPlayer ? gameState.localPlayer.energy : 0
+                    }];
+                    endGame(standings);
+                }
+            }, 1000);
+        }
+
         // ==================== GAME MODES ====================
         function createRoom() {
             document.getElementById('mainMenu').style.display = 'none';
@@ -1580,37 +1611,44 @@
             // Setup canvas
             canvas = document.getElementById('gameCanvas');
             ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
 
-            function resizeCanvas() {
+            // Generate platforms once
+            generatePlatforms(platformSeed);
+
+            // Handle resize without regenerating platforms
+            window.addEventListener('resize', () => {
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
-                generatePlatforms(platformSeed);
-            }
-
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
+            });
 
             // Initialize player and start game loop
             initializeLocalPlayer();
-            generatePlatforms(platformSeed);
 
             document.getElementById('lobbyScreen').style.display = 'none';
             document.getElementById('gameScreen').style.display = 'block';
 
-            // Start countdown timer
-            updateGameTimer();
-            const timerInterval = setInterval(() => {
-                gameState.gameTimer--;
-                updateGameTimer();
+            // Make sure canvas can receive focus
+            canvas.tabIndex = 1;
+            canvas.focus();
+            document.body.focus();
 
-                if (gameState.gameTimer <= 0) {
-                    clearInterval(timerInterval);
-                    gameState.gameActive = false;
-                    // Server will send gameOver
-                }
-            }, 1000);
+            // Start countdown timer (only for multiplayer — solo mode runs its own)
+            if (gameState.ws) {
+                updateGameTimer();
+                const timerInterval = setInterval(() => {
+                    gameState.gameTimer--;
+                    updateGameTimer();
+                    if (gameState.gameTimer <= 0) {
+                        clearInterval(timerInterval);
+                        gameState.gameActive = false;
+                    }
+                }, 1000);
+            }
 
             // Start game loop
+            console.log('Game started! Platforms:', platforms.length, 'Player:', gameState.localPlayer);
             gameLoop();
         }
 
