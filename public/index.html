@@ -1,0 +1,1677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sailing 101: Don't Look Down</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        /* ==================== LOBBY SCREEN ==================== */
+        #lobbyScreen {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .logo p {
+            font-size: 0.95em;
+            color: #666;
+            font-style: italic;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* ==================== LOBBY CONTENT ==================== */
+        .lobby-section {
+            margin-bottom: 30px;
+        }
+
+        .lobby-section h2 {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 0.9em;
+        }
+
+        .waiting-room {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .waiting-room h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .room-code {
+            background: white;
+            border: 3px dashed #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .room-code-text {
+            font-size: 2em;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            color: #667eea;
+            font-family: 'Courier New', monospace;
+        }
+
+        .players-list {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .player-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-item:last-child {
+            border-bottom: none;
+        }
+
+        .player-item .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .player-item .name {
+            flex: 1;
+        }
+
+        .player-item .host-badge {
+            background: #667eea;
+            color: white;
+            font-size: 0.75em;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        /* ==================== GAME SCREEN ==================== */
+        #gameScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 50%, #B0E0E6 100%);
+            display: none;
+            z-index: 1000;
+        }
+
+        canvas {
+            display: block;
+            background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 50%, #B0E0E6 100%);
+        }
+
+        .hud {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            z-index: 1001;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .hud-left {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .hud-right {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: right;
+        }
+
+        .hud-center {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .energy-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .energy-bar-fill {
+            width: 150px;
+            height: 15px;
+            background: #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .energy-bar-inner {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            transition: width 0.2s;
+            width: 100%;
+        }
+
+        .player-info {
+            font-size: 0.9em;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .timer {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .leaderboard {
+            font-size: 0.85em;
+            max-width: 200px;
+        }
+
+        .leaderboard-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+
+        .leaderboard-entry {
+            padding: 5px 0;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #eee;
+        }
+
+        .leaderboard-entry:last-child {
+            border-bottom: none;
+        }
+
+        .leaderboard-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .leaderboard-height {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        /* ==================== QUESTION OVERLAY ==================== */
+        .question-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .question-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .question-box {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .question-header h2 {
+            flex: 1;
+            font-size: 1.3em;
+            color: #333;
+        }
+
+        .question-timer {
+            font-size: 1.5em;
+            font-weight: bold;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .question-timer.warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .question-text {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .answers-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .answer-btn {
+            padding: 15px;
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .answer-btn:hover:not(:disabled) {
+            background: #e0e0e0;
+            border-color: #667eea;
+        }
+
+        .answer-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        .answer-btn.correct {
+            background: #4CAF50;
+            color: white;
+            border-color: #45a049;
+        }
+
+        .answer-btn.wrong {
+            background: #f44336;
+            color: white;
+            border-color: #da190b;
+        }
+
+        /* ==================== RESULTS SCREEN ==================== */
+        #resultsScreen {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .results-title {
+            font-size: 2em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .results-message {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .standings-list {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .standing {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .standing:last-child {
+            margin-bottom: 0;
+        }
+
+        .standing-medal {
+            font-size: 2em;
+            width: 40px;
+            text-align: center;
+        }
+
+        .standing-info {
+            flex: 1;
+            text-align: left;
+        }
+
+        .standing-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        .standing-height {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .confetti {
+            position: fixed;
+            pointer-events: none;
+            font-size: 2em;
+            z-index: 999;
+            animation: fall 3s linear forwards;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* ==================== CONNECTING SCREEN ==================== */
+        .connecting-screen {
+            text-align: center;
+            color: white;
+        }
+
+        .connecting-screen h1 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .connecting-screen p {
+            margin-top: 20px;
+            font-size: 1.1em;
+        }
+
+        /* ==================== RESPONSIVE ==================== */
+        @media (max-width: 600px) {
+            #lobbyScreen {
+                padding: 20px;
+                margin: 20px;
+            }
+
+            .logo h1 {
+                font-size: 1.8em;
+            }
+
+            .answers-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hud {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .hud-left,
+            .hud-right {
+                width: 100%;
+            }
+
+            .leaderboard {
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Lobby Screen -->
+    <div id="lobbyScreen" class="screen active">
+        <div class="logo">
+            <h1>⛵ Sailing 101</h1>
+            <p>Don't Look Down</p>
+        </div>
+
+        <div id="connectingMode" class="connecting-screen" style="display:none;">
+            <h1>Connecting...</h1>
+            <div class="spinner"></div>
+            <p id="connectingMessage">Joining room...</p>
+        </div>
+
+        <div id="mainMenu" style="display:block;">
+            <!-- Create Room -->
+            <div class="lobby-section">
+                <h2>New Game</h2>
+                <button class="btn-primary" onclick="createRoom()">Create Room</button>
+                <div id="roomCodeDisplay" style="display:none; margin-top: 15px;">
+                    <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Your Room Code:</p>
+                    <div class="room-code">
+                        <div class="room-code-text" id="displayRoomCode"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Join Room -->
+            <div class="lobby-section">
+                <h2>Join Room</h2>
+                <div class="input-group">
+                    <label for="roomCodeInput">Room Code (4 letters)</label>
+                    <input type="text" id="roomCodeInput" placeholder="e.g., ABCD" maxlength="4"
+                           onkeyup="this.value = this.value.toUpperCase()">
+                </div>
+                <div class="input-group">
+                    <label for="playerNameInput">Your Name</label>
+                    <input type="text" id="playerNameInput" placeholder="Enter your name" maxlength="20">
+                </div>
+                <button class="btn-primary" onclick="joinRoom()">Join Room</button>
+            </div>
+        </div>
+
+        <!-- Waiting Room -->
+        <div id="waitingRoom" class="lobby-section" style="display:none;">
+            <div class="waiting-room">
+                <h3>Waiting for Game to Start</h3>
+
+                <div style="margin-bottom: 15px;">
+                    <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Room Code:</p>
+                    <div class="room-code">
+                        <div class="room-code-text" id="waitingRoomCode"></div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <p style="font-weight: 600; margin-bottom: 10px;">Players in Room:</p>
+                    <div class="players-list" id="playersList"></div>
+                </div>
+
+                <div id="hostControls" style="display:none;">
+                    <div class="input-group">
+                        <label for="timerSelect">Game Duration</label>
+                        <select id="timerSelect">
+                            <option value="180">3 minutes</option>
+                            <option value="300" selected>5 minutes</option>
+                            <option value="420">7 minutes</option>
+                            <option value="600">10 minutes</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" onclick="startGame()" style="width: 100%;">Start Game</button>
+                </div>
+
+                <div id="notHostMessage" style="display:none; text-align:center; padding:20px;">
+                    <p style="color: #666;">Waiting for host to start the game...</p>
+                </div>
+
+                <button class="btn-secondary" onclick="leaveRoom()" style="width: 100%; margin-top: 15px;">Leave Room</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen">
+        <canvas id="gameCanvas"></canvas>
+
+        <div class="hud">
+            <div class="hud-left">
+                <div class="energy-bar">
+                    <span style="font-weight: 600;">⚡ Energy:</span>
+                    <div class="energy-bar-fill">
+                        <div class="energy-bar-inner" id="energyBarInner"></div>
+                    </div>
+                    <span id="energyText">10</span>
+                </div>
+                <div class="player-info">
+                    <span id="playerNameDisplay">Player</span>
+                </div>
+            </div>
+
+            <div class="hud-right">
+                <div class="timer" id="timerDisplay">5:00</div>
+                <div class="leaderboard">
+                    <div class="leaderboard-title">Leaderboard</div>
+                    <div id="leaderboardContent"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hud-center">
+            Press <strong>Q</strong> for questions | <strong>Arrows</strong> to move | <strong>Space/Up</strong> to jump
+        </div>
+    </div>
+
+    <!-- Question Overlay -->
+    <div id="questionOverlay" class="question-overlay">
+        <div class="question-box">
+            <div class="question-header">
+                <h2>Knowledge Check</h2>
+                <div class="question-timer" id="questionTimer">15</div>
+            </div>
+            <div class="question-text" id="questionText"></div>
+            <div class="answers-grid" id="answersGrid"></div>
+        </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="resultsScreen" class="screen">
+        <div class="results-title">Game Over!</div>
+        <div class="results-message">
+            🎉 Highest Climber: <span id="highestClimber">Player</span> 🎉
+        </div>
+
+        <div class="standings-list" id="standingsList"></div>
+
+        <button class="btn-primary" onclick="backToLobby()" style="width: 100%; margin-bottom: 10px;">Back to Lobby</button>
+    </div>
+
+    <script>
+        // ==================== GAME STATE ====================
+        const gameState = {
+            localPlayerId: null,
+            roomCode: null,
+            isHost: false,
+            localPlayer: null,
+            remotePlayers: new Map(),
+            ws: null,
+            gameActive: false,
+            gameTimer: 0,
+            platformSeed: 0,
+            serverTime: 0,
+            playerColors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE']
+        };
+
+        // ==================== CANVAS & RENDERING ====================
+        let canvas, ctx;
+        let cameraY = 0;
+        let platforms = [];
+        let gameLoopId = null;
+
+        // Seeded PRNG
+        function mulberry32(a) {
+            return function() {
+                a |= 0;
+                a = a + 0x6d2b79f5 | 0;
+                let t = Math.imul(a ^ a >>> 15, 1 | a);
+                t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+                return ((t ^ t >>> 14) >>> 0) / 4294967296;
+            };
+        }
+
+        // Generate platforms deterministically
+        let platformGenY = 0; // Track how far we've generated
+        let platformRng = null;
+
+        function generatePlatforms(seed) {
+            platformRng = mulberry32(seed);
+            platforms = [];
+
+            // Ground platform
+            platforms.push({
+                x: 0,
+                y: canvas.height - 30,
+                width: canvas.width,
+                height: 30
+            });
+
+            platformGenY = canvas.height - 100;
+
+            // Generate initial batch of platforms (enough for ~50000px of climbing)
+            generateMorePlatforms(50000);
+        }
+
+        function generateMorePlatforms(heightToGenerate) {
+            if (!platformRng) return;
+            const targetY = platformGenY - heightToGenerate;
+            let lastX = canvas.width / 2;
+
+            while (platformGenY > targetY) {
+                const width = 80 + platformRng() * 60;
+                // Keep platforms reachable: max ~180px horizontal from last platform
+                const maxShift = 180;
+                let x = lastX + (platformRng() * maxShift * 2 - maxShift);
+                // Clamp to canvas bounds
+                x = Math.max(0, Math.min(canvas.width - width, x));
+                const spacingY = 60 + platformRng() * 35;
+
+                platforms.push({
+                    x: x,
+                    y: platformGenY,
+                    width: width,
+                    height: 15
+                });
+
+                lastX = x + width / 2;
+                platformGenY -= spacingY;
+            }
+        }
+
+        // Initialize local player
+        function initializeLocalPlayer() {
+            if (!gameState.localPlayer) {
+                gameState.localPlayer = {
+                    id: gameState.localPlayerId,
+                    x: canvas.width / 2,
+                    y: canvas.height - 80,
+                    velocityX: 0,
+                    velocityY: 0,
+                    energy: 10,
+                    heightReached: 0,
+                    canDoubleJump: true,
+                    isJumping: false,
+                    colorIndex: Math.floor(Math.random() * gameState.playerColors.length)
+                };
+            }
+        }
+
+        // Update local player physics
+        function updateLocalPlayer() {
+            const player = gameState.localPlayer;
+            if (!player) return;
+
+            // Gravity
+            player.velocityY += 0.5;
+
+            // Apply velocity
+            player.x += player.velocityX;
+            player.y += player.velocityY;
+
+            // Keep in bounds
+            if (player.x < 0) player.x = 0;
+            if (player.x + 20 > canvas.width) player.x = canvas.width - 20;
+
+            // Check platform collisions
+            let onPlatform = false;
+            for (let platform of platforms) {
+                if (player.velocityY >= 0 && // Falling
+                    player.y + 20 <= platform.y + 5 && // Top of platform
+                    player.y + 20 >= platform.y - 10 &&
+                    player.x + 20 >= platform.x &&
+                    player.x <= platform.x + platform.width) {
+                    player.y = platform.y - 20;
+                    player.velocityY = 0;
+                    player.isJumping = false;
+                    player.canDoubleJump = true;
+                    onPlatform = true;
+                }
+            }
+
+            // Death fall — respawn on the nearest platform below highest point
+            if (player.y > cameraY + canvas.height + 200) {
+                // Find the highest platform near the player's x position
+                let bestPlatform = platforms[0]; // ground
+                for (let p of platforms) {
+                    if (p.y < player.y && p.y > bestPlatform.y - 500) {
+                        bestPlatform = p;
+                    }
+                }
+                player.x = bestPlatform.x + bestPlatform.width / 2 - 10;
+                player.y = bestPlatform.y - 25;
+                player.velocityY = 0;
+                player.velocityX = 0;
+            }
+
+            // Update height reached (starting y is canvas.height - 80, so height = how far above that)
+            const heightReached = Math.max(0, (canvas.height - 80) - player.y);
+            player.heightReached = Math.max(player.heightReached, heightReached);
+        }
+
+        // Handle input
+        const keys = {};
+        window.addEventListener('keydown', (e) => {
+            keys[e.key.toLowerCase()] = true;
+            if (e.key === 'q' || e.key === 'Q') {
+                showQuestionOverlay();
+            }
+        });
+        window.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+        });
+
+        function handleMovement() {
+            const player = gameState.localPlayer;
+            if (!player) return;
+
+            // Horizontal movement
+            player.velocityX = 0;
+            if (keys['arrowleft']) player.velocityX = -5;
+            if (keys['arrowright']) player.velocityX = 5;
+
+            // Jump
+            if ((keys[' '] || keys['arrowup']) && !keys['__lastJump']) {
+                if (!player.isJumping) {
+                    if (player.energy >= 1) {
+                        player.velocityY = -12;
+                        player.isJumping = true;
+                        player.energy--;
+                        keys['__lastJump'] = true;
+                    }
+                } else if (player.canDoubleJump && player.energy >= 1) {
+                    player.velocityY = -10;
+                    player.canDoubleJump = false;
+                    player.energy--;
+                    keys['__lastJump'] = true;
+                }
+            }
+            if (!keys[' '] && !keys['arrowup']) {
+                keys['__lastJump'] = false;
+            }
+
+            // Auto-show question if energy is 0
+            if (player.energy <= 0 && !document.getElementById('questionOverlay').classList.contains('active')) {
+                showQuestionOverlay();
+            }
+        }
+
+        // Render game
+        function render() {
+            const player = gameState.localPlayer;
+            if (!player) return;
+
+            // Update camera (follow player upward — y decreases as player climbs)
+            const targetCameraY = player.y - canvas.height * 0.6;
+            cameraY += (targetCameraY - cameraY) * 0.1; // Smooth follow
+
+            // Generate more platforms if player is getting close to the top of generated area
+            if (player.y < platformGenY + 2000) {
+                generateMorePlatforms(10000);
+            }
+
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Gradient background (darker at top)
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            const topColor = `hsl(200, 100%, ${Math.max(30, 60 - (cameraY / 500))}%)`;
+            gradient.addColorStop(0, topColor);
+            gradient.addColorStop(1, '#87CEEB');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw platforms
+            ctx.fillStyle = '#8B6914';
+            for (let platform of platforms) {
+                const screenY = platform.y - cameraY;
+                if (screenY < canvas.height + 50 && screenY > -50) {
+                    ctx.beginPath();
+                    ctx.roundRect(platform.x, screenY, platform.width, platform.height, 5);
+                    ctx.fill();
+                    ctx.strokeStyle = '#6B4810';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            }
+
+            // Draw local player
+            const localScreenY = player.y - cameraY;
+            ctx.fillStyle = gameState.playerColors[player.colorIndex];
+            ctx.fillRect(player.x, localScreenY, 20, 20);
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(player.x, localScreenY, 20, 20);
+
+            // Player name above
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(gameState.localPlayerId ? 'You' : 'Local', player.x + 10, localScreenY - 5);
+
+            // Draw remote players
+            for (let [id, remotePlayer] of gameState.remotePlayers) {
+                const remoteScreenY = remotePlayer.y - cameraY;
+                if (remoteScreenY < canvas.height + 50 && remoteScreenY > -50) {
+                    ctx.globalAlpha = 0.6;
+                    ctx.fillStyle = gameState.playerColors[remotePlayer.colorIndex || 0];
+                    ctx.fillRect(remotePlayer.x, remoteScreenY, 20, 20);
+                    ctx.globalAlpha = 1;
+
+                    ctx.fillStyle = '#333';
+                    ctx.font = '10px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(remotePlayer.name || 'Player', remotePlayer.x + 10, remoteScreenY - 5);
+                }
+            }
+
+            // Draw decorative clouds at certain heights
+            drawClouds();
+        }
+
+        function drawClouds() {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            for (let i = 0; i < 5; i++) {
+                const y = (i * 200) - cameraY;
+                if (y > -50 && y < canvas.height + 50) {
+                    ctx.beginPath();
+                    ctx.arc(100 + i * 150, y, 30, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        // Game loop
+        function gameLoop() {
+            handleMovement();
+            updateLocalPlayer();
+            updateRemotePlayerInterpolation();
+            render();
+            updateHUD();
+
+            // Send position to server ~15fps
+            if (gameState.gameActive && gameState.localPlayer) {
+                sendPlayerUpdate();
+            }
+
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        function updateRemotePlayerInterpolation() {
+            // Smooth interpolation could be added here
+        }
+
+        function updateHUD() {
+            const player = gameState.localPlayer;
+            if (!player) return;
+
+            // Energy bar
+            const energyPercent = Math.min(player.energy / 30, 1) * 100;
+            document.getElementById('energyBarInner').style.width = energyPercent + '%';
+            document.getElementById('energyText').textContent = Math.ceil(player.energy);
+
+            // Player name
+            document.getElementById('playerNameDisplay').textContent = gameState.localPlayerId ? 'You' : 'Local Player';
+
+            // Height reached
+            const heightDisplay = Math.max(0, Math.floor(player.heightReached));
+            const playerInfo = document.querySelector('.player-info');
+            if (playerInfo) {
+                playerInfo.innerHTML = `<strong>Height:</strong> ${heightDisplay}m`;
+            }
+
+            // Leaderboard
+            updateLeaderboard();
+        }
+
+        function updateLeaderboard() {
+            const players = [gameState.localPlayer, ...Array.from(gameState.remotePlayers.values())];
+            const sorted = players.sort((a, b) => b.heightReached - a.heightReached);
+
+            let html = '';
+            sorted.slice(0, 5).forEach((p, i) => {
+                const isLocal = p.id === gameState.localPlayerId;
+                html += `<div class="leaderboard-entry">
+                    <span class="leaderboard-name" style="${isLocal ? 'font-weight: bold; color: #667eea;' : ''}">${p.name || 'Player'}</span>
+                    <span class="leaderboard-height">${Math.floor(p.heightReached)}m</span>
+                </div>`;
+            });
+            document.getElementById('leaderboardContent').innerHTML = html;
+        }
+
+        // ==================== WEBSOCKET ====================
+        function connectWebSocket(roomCode, playerName) {
+            const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+            const host = window.location.host;
+            const ws = new WebSocket(`${protocol}://${host}`);
+
+            ws.onopen = () => {
+                console.log('Connected to server');
+                ws.send(JSON.stringify({
+                    type: 'join',
+                    room: roomCode,
+                    name: playerName
+                }));
+            };
+
+            ws.onmessage = (event) => {
+                const message = JSON.parse(event.data);
+                handleServerMessage(message, ws);
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                alert('Connection error. Please refresh and try again.');
+            };
+
+            ws.onclose = () => {
+                console.log('Disconnected from server');
+            };
+
+            gameState.ws = ws;
+        }
+
+        function handleServerMessage(message, ws) {
+            switch (message.type) {
+                case 'joined':
+                    gameState.localPlayerId = message.playerId;
+                    gameState.roomCode = message.roomCode;
+                    gameState.isHost = message.isHost;
+                    gameState.platformSeed = message.platformSeed;
+
+                    // Update UI
+                    document.getElementById('connectingMode').style.display = 'none';
+                    document.getElementById('mainMenu').style.display = 'none';
+                    document.getElementById('waitingRoom').style.display = 'block';
+                    document.getElementById('waitingRoomCode').textContent = message.roomCode;
+
+                    if (gameState.isHost) {
+                        document.getElementById('hostControls').style.display = 'block';
+                        document.getElementById('notHostMessage').style.display = 'none';
+                    } else {
+                        document.getElementById('hostControls').style.display = 'none';
+                        document.getElementById('notHostMessage').style.display = 'block';
+                    }
+
+                    // Add existing players
+                    message.players.forEach(p => {
+                        if (p.id !== gameState.localPlayerId) {
+                            gameState.remotePlayers.set(p.id, {
+                                id: p.id,
+                                name: p.name,
+                                x: p.x,
+                                y: p.y,
+                                energy: p.energy,
+                                heightReached: p.heightReached,
+                                colorIndex: Math.floor(Math.random() * gameState.playerColors.length)
+                            });
+                        }
+                    });
+
+                    updatePlayersList();
+                    break;
+
+                case 'playerJoined':
+                    gameState.remotePlayers.set(message.player.id, {
+                        ...message.player,
+                        colorIndex: Math.floor(Math.random() * gameState.playerColors.length)
+                    });
+                    updatePlayersList();
+                    break;
+
+                case 'playerLeft':
+                    gameState.remotePlayers.delete(message.playerId);
+                    updatePlayersList();
+                    break;
+
+                case 'newHost':
+                    if (message.playerId === gameState.localPlayerId) {
+                        gameState.isHost = true;
+                        document.getElementById('hostControls').style.display = 'block';
+                        document.getElementById('notHostMessage').style.display = 'none';
+                    }
+                    break;
+
+                case 'gameStart':
+                    startGameMode(message.timerDuration, message.platformSeed);
+                    break;
+
+                case 'playerUpdate':
+                    if (gameState.remotePlayers.has(message.playerId)) {
+                        const p = gameState.remotePlayers.get(message.playerId);
+                        p.x = message.x;
+                        p.y = message.y;
+                        p.energy = message.energy;
+                        p.heightReached = message.heightReached;
+                    }
+                    break;
+
+                case 'answerResult':
+                    if (message.playerId !== gameState.localPlayerId) {
+                        if (gameState.remotePlayers.has(message.playerId)) {
+                            gameState.remotePlayers.get(message.playerId).energy = message.newEnergy;
+                        }
+                    }
+                    break;
+
+                case 'gameOver':
+                    endGame(message.standings);
+                    break;
+
+                case 'error':
+                    alert('Error: ' + message.error);
+                    break;
+            }
+        }
+
+        function updatePlayersList() {
+            const players = Array.from(gameState.remotePlayers.values());
+            let html = `<div class="player-item">
+                <div class="avatar" style="background: ${gameState.playerColors[gameState.localPlayer?.colorIndex || 0]}">🧑</div>
+                <div class="name">You</div>
+                ${gameState.isHost ? '<div class="host-badge">HOST</div>' : ''}
+            </div>`;
+
+            players.forEach((p, i) => {
+                html += `<div class="player-item">
+                    <div class="avatar" style="background: ${gameState.playerColors[p.colorIndex || i % gameState.playerColors.length]}">${i + 1}</div>
+                    <div class="name">${p.name}</div>
+                </div>`;
+            });
+
+            document.getElementById('playersList').innerHTML = html;
+        }
+
+        function sendPlayerUpdate() {
+            if (!gameState.ws || gameState.ws.readyState !== WebSocket.OPEN || !gameState.localPlayer) return;
+
+            gameState.ws.send(JSON.stringify({
+                type: 'playerUpdate',
+                x: gameState.localPlayer.x,
+                y: gameState.localPlayer.y,
+                energy: gameState.localPlayer.energy,
+                heightReached: gameState.localPlayer.heightReached
+            }));
+        }
+
+        // ==================== QUESTION SYSTEM ====================
+        const questionBank = [
+            {question: "When sailing, always be aware of the wind's ___ and ___", answer: "speed, direction", distractors: ["power, force", "speed, power", "direction, force"]},
+            {question: "The desirable force generated by the wind moving across a sail is called ______.", answer: "lift", distractors: ["drag", "thrust", "force"]},
+            {question: "The direction relative to the wind in which the sailboat cannot sail is called the _____ ____ _____.", answer: "no sail zone", distractors: ["dead zone", "wind gap", "zero zone"]},
+            {question: "Sailboats can reach an upwind destination by sailing a ____ course.", answer: "zigzag", distractors: ["tacking", "curved", "angled"]},
+            {question: "The combination of the true wind and the wind created by the boat's motion is called _____ wind.", answer: "apparent", distractors: ["relative", "combined", "true"]},
+            {question: "The _____ is an underwater fin fixed on the bottom of the sailboat that provides stability.", answer: "keel", distractors: ["rudder", "centerboard", "fin"]},
+            {question: "The sailboat's direction through the water is controlled by the ____, which can be turned by the _______.", answer: "rudder, tiller", distractors: ["helm, wheel", "rudder, wheel", "tiller, helm"]},
+            {question: "The top point of a sail is called the ___.", answer: "head", distractors: ["peak", "crown", "top"]},
+            {question: "The forward bottom point of a sail is called the ___.", answer: "tack", distractors: ["clew", "corner", "foot"]},
+            {question: "The aft bottom point of a sail is called the ___.", answer: "clew", distractors: ["tack", "leech", "corner"]},
+            {question: "The forward edge of a sail is called the ___.", answer: "luff", distractors: ["leech", "foot", "edge"]},
+            {question: "The aft curved edge of a sail is called the ___.", answer: "leech", distractors: ["luff", "clew", "foot"]},
+            {question: "The bottom edge of a sail is called the ___.", answer: "foot", distractors: ["base", "boom", "bottom"]},
+            {question: "Stiff pieces in a sail that provide support are called _____.", answer: "batten", distractors: ["ribs", "spars", "rods"]},
+            {question: "Moving forward on a boat is called ___.", answer: "ahead", distractors: ["forward", "bow", "ahead"]},
+            {question: "Moving towards the stern of a boat is called ___.", answer: "astern", distractors: ["aft", "backward", "rear"]},
+            {question: "The middle width of a boat is called ___.", answer: "abeam", distractors: ["beam", "across", "side"]},
+            {question: "The front tip of a boat is called the ___.", answer: "bow", distractors: ["front", "head", "nose"]},
+            {question: "The rear end of a boat is called the ___.", answer: "stern", distractors: ["aft", "back", "rear"]},
+            {question: "The left side of a boat when looking forward is called ___.", answer: "port", distractors: ["left", "starboard", "side"]},
+            {question: "The right side of a boat when looking forward is called ___.", answer: "starboard", distractors: ["right", "port", "side"]},
+            {question: "The side of a boat hitting the wind first is called ___.", answer: "windward", distractors: ["leeward", "weather", "wind-side"]},
+            {question: "The side of a boat the wind hits second or leaves from is called ___.", answer: "leeward", distractors: ["windward", "lee-side", "shelter"]},
+            {question: "The section of a boat between the mast and bow is called ___.", answer: "forward", distractors: ["front", "head", "bow"]},
+            {question: "The section of a boat between the mast and stern is called ___.", answer: "aft", distractors: ["back", "rear", "stern"]},
+            {question: "The tackle and block that controls the left/right direction of the boom on the mainsail is called the ___.", answer: "mainsheet", distractors: ["jibsheet", "halyard", "topping lift"]},
+            {question: "The point where the boom and mast connect is called the ___.", answer: "gooseneck", distractors: ["boom vang", "halyard", "mast step"]},
+            {question: "The block and tackle that holds down the boom is called the ___.", answer: "boom vang", distractors: ["topping lift", "mainsheet", "boom jack"]},
+            {question: "The line that lifts either the mainsail or jib is called a ___.", answer: "halyard", distractors: ["sheet", "line", "vang"]},
+            {question: "The line that connects to the aft end of the boom is called the ___.", answer: "boom topping lift", distractors: ["mainsheet", "halyard", "boom vang"]},
+            {question: "The line that connects to the clew of the jib is called the ___.", answer: "jibsheet", distractors: ["mainsheet", "halyard", "jib halyard"]},
+            {question: "The mainsail should be raised when the sailboat is oriented _____ to _____.", answer: "head, wind", distractors: ["bow, wind", "toward, wind", "facing, breeze"]},
+            {question: "When turning the boat toward the wind, sails should be ___ in.", answer: "trimmed", distractors: ["eased", "loosened", "let out"]},
+            {question: "When turning the boat away from the wind, the sails should be _________ out.", answer: "eased", distractors: ["trimmed", "loosened", "released"]},
+            {question: "'Fluttering' sails are said to be ______.", answer: "luffing", distractors: ["flapping", "loose", "free"]},
+            {question: "The best way to steer the boat on a straight course is to look toward the ___ and pick a ___ to steer toward.", answer: "shore, landmark", distractors: ["water, point", "distance, object", "horizon, star"]},
+            {question: "When you turn the bow of the boat toward the wind you are ___.", answer: "heading up", distractors: ["turning out", "heading out", "coming about"]},
+            {question: "When you turn the bow of the boat away from the wind you are ___.", answer: "bearing away", distractors: ["heading down", "turning away", "jibing"]},
+            {question: "The 'golden rule' of sail trim is: 'When in ______, let it _____.'", answer: "doubt, out", distractors: ["question, go", "trouble, go", "doubt, go"]},
+            {question: "When the boat is stopped, pointed toward the wind with the sails luffing, it is said to be _____________.", answer: "in irons", distractors: ["stuck", "stalled", "luffing"]},
+            {question: "The point of sail at the edge of the no-sail zone is called ___ ___.", answer: "close-hauled", distractors: ["tight reach", "close reach", "near haul"]},
+            {question: "A boat sailing across the wind is said to be ___.", answer: "reaching", distractors: ["crossing", "beaming", "side sailing"]},
+            {question: "Sailing straight downwind is called ___.", answer: "running", distractors: ["flying", "downwind", "going"]},
+            {question: "As the sailboat's direction changes relative to the wind, the sail's _____ to the wind should be adjusted.", answer: "angle", distractors: ["trim", "position", "shape"]},
+            {question: "If wind is coming from 12 o'clock and your bow is at around 1 o'clock, you are ___.", answer: "close-hauled", distractors: ["close reach", "beam reach", "reaching"]},
+            {question: "If wind is coming from 12 o'clock and your bow is at around 2 o'clock, you are ___.", answer: "close-reach", distractors: ["close-hauled", "beam reach", "broad reach"]},
+            {question: "If wind is coming from 12 o'clock and your bow is at around 3 o'clock, you are ___.", answer: "beam reach", distractors: ["close-reach", "broad reach", "running"]},
+            {question: "If wind is coming from 12 o'clock and your bow is at 4 o'clock, you are ___.", answer: "broad reach", distractors: ["beam reach", "close-reach", "running"]},
+            {question: "If wind is coming from 12 o'clock and your bow is at 6 o'clock, you are ___.", answer: "run", distractors: ["running", "broad reach", "downwind"]},
+            {question: "When the wind is blowing on the port side, the boat is said to be sailing on a ______ ______.", answer: "port tack", distractors: ["port side", "left tack", "port sail"]},
+            {question: "When the wind is blowing on the starboard side, the boat is said to be sailing on a ______ _______.", answer: "starboard tack", distractors: ["starboard side", "right tack", "starboard sail"]},
+            {question: "Turning the boat so the bow passes through the wind is called ___.", answer: "tacking", distractors: ["jibing", "coming about", "turning"]},
+            {question: "Changing tacks by turning the boat so its stern passes through the wind is called ____.", answer: "jibing", distractors: ["tacking", "gybing", "coming about"]},
+            {question: "The helmsman's commands for tacking the boat are '___' and '___'.", answer: "ready about, helm's alee", distractors: ["prepare to tack, tack ho", "ready tack, come about", "helm ready, tack now"]},
+            {question: "The helmsman's commands for jibing the boat are '____ to ____' and '____-______'.", answer: "prepare to jibe, jibe-ho", distractors: ["ready jibe, jibe now", "prepare jibe, jibe-ho", "get set, jibe-ho"]},
+            {question: "To jibe safely, it's important to ______ the _______ in toward the centerline.", answer: "trim, mainsail", distractors: ["ease, jib", "trim, jib", "ease, mainsail"]},
+            {question: "Sailing downwind with the mainsail and jib on opposite sides is called sailing ___ on ___.", answer: "wing on wing", distractors: ["sail on sail", "spread on spread", "wide on wide"]},
+            {question: "If the wind is on the same side of the boat as the mainsail while sailing downwind, the boat is said to be ________ by the _______.", answer: "sailing by the lee", distractors: ["jibing by the lee", "by the lee sailing", "lee sailing"]},
+            {question: "The danger of sailing by the lee is the increased risk of an___________ ___.", answer: "accidental jibe", distractors: ["unplanned tack", "sudden jibe", "surprise jibe"]},
+            {question: "The fastest way to change the sail's power is to change its _____ to the _____.", answer: "angle, wind", distractors: ["shape, wind", "trim, breeze", "position, air"]},
+            {question: "The outhaul changes the depth of the ____ of the mainsail.", answer: "draft", distractors: ["luff", "leech", "sail"]},
+            {question: "Tightening the downhaul or cunningham moves the draft of the mainsail ______.", answer: "forward", distractors: ["back", "up", "down"]},
+            {question: "Tightening the ________ ________ holds the boom down on a downwind point of sail.", answer: "boom vang", distractors: ["topping lift", "mainsheet", "downhaul"]},
+            {question: "To get full power and optimum use of the mainsail, _____ it until it just starts to luff.", answer: "ease", distractors: ["trim", "trim in", "tighten"]},
+            {question: "Change the sail's angle to the wind by ___.", answer: "ease or trim the sail", distractors: ["turning the boat", "moving the boom", "adjusting the mast"]},
+            {question: "Besides easing or trimming the sail, change the sail's angle by ___.", answer: "head-up or bear away", distractors: ["turn the wheel", "shift weight", "adjust jib"]},
+            {question: "The tendency for the boat to head up toward the wind on its own is called _______ helm.", answer: "weather", distractors: ["wind", "lee", "upwind"]},
+            {question: "The tendency for the boat to bear away from the wind on its own is called ______ helm.", answer: "lee", distractors: ["leeward", "downwind", "weather"]},
+            {question: "At close-haul, move the crew to the _______ side of the boat to reduce heeling.", answer: "windward", distractors: ["leeward", "upwind", "down wind"]},
+            {question: "At close-haul, _______ ________ slightly to reduce heeling.", answer: "head up", distractors: ["bear away", "trim in", "ease out"]},
+            {question: "At close-haul, ______ the __________ to reduce heeling.", answer: "ease, sheet", distractors: ["trim, sail", "tighten, line", "ease, line"]},
+            {question: "At close-haul, move the _______ to leeward to reduce heeling.", answer: "traveler", distractors: ["boom", "mast", "sheet"]},
+            {question: "Reducing the size of a sail so less area is exposed to the wind is called _______.", answer: "reefing", distractors: ["furling", "rolling", "reducing"]},
+            {question: "This knot is used to tie two ends of a line together.", answer: "square knot", distractors: ["bowline", "cleat hitch", "figure 8"]},
+            {question: "This knot is more secure for tying up to a dock piling.", answer: "round turn and 2 half hitches", distractors: ["square knot", "bowline", "clove hitch"]},
+            {question: "This knot forms a non-slipping loop and ties jib sheets to the clew.", answer: "bowline", distractors: ["square knot", "figure 8", "cleat hitch"]},
+            {question: "This knot keeps a line from slipping through a fairlead or block.", answer: "figure 8", distractors: ["square knot", "bowline", "round turn"]},
+            {question: "This knot is good to secure a dock line to a horn cleat.", answer: "cleat hitch", distractors: ["square knot", "bowline", "clove hitch"]},
+            {question: "This knot is good for temporarily tying up a dock piling.", answer: "clove hitch", distractors: ["square knot", "bowline", "round turn"]},
+            {question: "When you want to slow while sailing, you can make the boat lie _______-________.", answer: "hove-to", distractors: ["stopped", "anchored", "stalled"]},
+            {question: "You can heave-to by backing the _______, easing the ______, and putting the _________ to leeward.", answer: "jib, mainsail, helm", distractors: ["mainsail, jib, tiller", "jib, jib, helm", "sail, sail, rudder"]},
+            {question: "These are used to protect the hull from contact with the dock or other boats.", answer: "fenders", distractors: ["bumpers", "guards", "protectors"]},
+            {question: "This dock line secures the bow of the boat to the dock.", answer: "bow line", distractors: ["stern line", "spring line", "breast line"]},
+            {question: "This dock line secures the stern of the boat to the dock.", answer: "stern line", distractors: ["bow line", "spring line", "after line"]},
+            {question: "This dock line keeps the boat from moving aft.", answer: "forward spring", distractors: ["aft spring", "bow line", "stern line"]},
+            {question: "This dock line keeps the boat from moving forward.", answer: "aft spring", distractors: ["forward spring", "bow line", "stern line"]},
+            {question: "The ideal point of sail to approach a mooring ball is on a _______.", answer: "close reach", distractors: ["close-haul", "beam reach", "running"]},
+            {question: "The best conditions under which to approach a dock under sail is an _______ ___.", answer: "upwind approach", distractors: ["downwind approach", "reaching approach", "close reach"]},
+            {question: "Rule 5 requires all vessels to maintain a proper lookout using _______ and _______.", answer: "sight, hearing", distractors: ["sight, instruments", "radar, sight", "sound, sight"]},
+            {question: "It is the responsibility of every vessel operator to avoid a _________.", answer: "collision", distractors: ["accident", "contact", "hitting others"]},
+            {question: "The ___________-_____________ vessel's obligation is to maintain ____________ and speed.", answer: "stand-on, course", distractors: ["give-way, heading", "stand-by, speed", "primary, path"]},
+            {question: "The _______ - _____________ vessel is required to maneuver out of the way.", answer: "give-way", distractors: ["stand-on", "other", "secondary"]},
+            {question: "A vessel overtaking another vessel must ____ _____ to the vessel being overtaken.", answer: "give way", distractors: ["stay clear", "slow down", "turn away"]},
+            {question: "When two sailing vessels approach on opposite tacks, the vessel with the wind on the __________ side is the stand-on vessel.", answer: "starboard", distractors: ["port", "left", "windward"]},
+            {question: "When two vessels sail with the wind on the same side, the vessel to ____________ is the give-way vessel.", answer: "windward", distractors: ["leeward", "starboard", "port"]},
+            {question: "When a sailboat has its engine in gear, it is defined as a ______-__________ vessel.", answer: "power-driven", distractors: ["motor-powered", "engine-driven", "mechanical"]},
+            {question: "A powerboat should __________ _______ to a sailboat under sail, unless the sailboat is ________ the powerboat.", answer: "give way, overtaking", distractors: ["stay clear, passing", "give way, passing", "turn away, ahead"]},
+            {question: "What part of the sail is found between the tack and the clew?", answer: "Foot", distractors: ["Head", "Leech", "Reefing cringle"]},
+            {question: "Common methods of attaching the luff of the mainsail to the mast are:", answer: "Slugs or bolt rope", distractors: ["Shackle or bowline", "Outhaul", "Gooseneck"]},
+            {question: "Telltales on luff of the jib are used by sailors to:", answer: "Correctly trim the sails and steer the boat", distractors: ["Estimate wind strength", "Estimate true wind direction", "Accurately assess boat speed"]},
+            {question: "When sailing close-hauled, your jib's leeward telltales start to droop or move erratically. What could you do to make the telltales stream?", answer: "Head up OR Ease the jibsheet", distractors: ["Bear away", "Trim in the jibsheet", "Bear away AND Trim in the jibsheet"]},
+            {question: "The mainsheet is a component of the:", answer: "Running rigging", distractors: ["Mainsail", "Main spar", "Standing rigging"]},
+            {question: "Sailing 'Close-hauled' is:", answer: "When the boat is sailing close to the wind at an efficient angle", distractors: ["When the mainsail is luffing erratically", "When the boat is sailing at maximum hull speed", "When the boat is sailing at maximum heeling angle"]},
+            {question: "The windward side of the boat is:", answer: "The side closest to the wind", distractors: ["The starboard side when sailing to windward", "The port side when sailing by-the-lee", "The side opposite the wind"]},
+            {question: "Jibing is:", answer: "A common way to change tacks while sailing on a downwind course", distractors: ["Dangerous and to be avoided at all costs", "Easy to accomplish, in strong winds and big seas", "A safer alternative to tacking"]},
+            {question: "When sailing close-hauled on a port tack, which statement is true?", answer: "The jib sheet is trimmed on the starboard side", distractors: ["The true wind is always stronger on the windward side", "The true wind is always stronger on the leeward side", "The next maneuver will be a gybe"]},
+            {question: "If you are sailing along with an apparent wind angle of 130°, what point of sail are you on?", answer: "Broad reach", distractors: ["Starboard tack", "Port jibe", "Close reach"]},
+            {question: "The wind you feel when sailing a boat is:", answer: "Apparent wind", distractors: ["Actual wind", "True wind", "Virtual wind"]},
+            {question: "To change from a close reach to a beam reach on the same tack, you must:", answer: "Bear away", distractors: ["Head up", "Tack", "Jibe"]},
+            {question: "What is twist in sail trim?", answer: "The difference between angle of attack at the foot, and near the head of the sail", distractors: ["The angle between the true and apparent wind", "The angle between the mast and the boom", "The listing of the boat in a seaway"]},
+            {question: "What is the most common way to increase twist in a mainsail?", answer: "Easing the mainsheet", distractors: ["Easing the traveller to leeward", "Tightening the vang", "Tightening the halyard"]},
+            {question: "When sailing at 6 kts boat speed, AWS is 15 kts at AWA of 40°. What is the approximate true wind speed and angle?", answer: "11 kts at 60°", distractors: ["5 kts at 60°", "9 kts at 30°", "17 kts at 70°"]},
+            {question: "Weather helm is when:", answer: "The boat has a tendency to head up toward the wind", distractors: ["The weather deteriorates and it's difficult to steer", "The helm is lashed to the side during a storm", "The boat has a tendency to bear away from the wind"]},
+            {question: "When sailors talk about VMG to a waypoint, what are they talking about?", answer: "The component of velocity applied toward a waypoint", distractors: ["The time expected to arrive at the waypoint", "Very Many Gusts", "The angles and waypoints involved in celestial navigation"]},
+            {question: "You are sailing on a steady course on a close reach. How will a sudden gust of wind affect your boat?", answer: "Cause the apparent wind to increase AND Possibly create more heel and weather helm", distractors: ["Cause the apparent wind to decrease and move forward", "Induce lee helm", "Cause the apparent wind to decrease"]},
+            {question: "Under what conditions should you consider reefing?", answer: "When de-powering techniques are no longer sufficient", distractors: ["When a small craft advisory is imminent", "When your crew suggests reefing", "When all neighboring boats are reefed"]},
+            {question: "The depth of a sail at any given height is defined as:", answer: "The longest perpendicular distance from the sail to the chord", distractors: ["Another name for the chord", "The angle at which the apparent wind strikes the chord", "The vertical curvature of the sail from head to foot"]},
+            {question: "Select methods that could reduce weather helm whilst sailing close hauled:", answer: "Ease the vang and mainsheet to create twist AND Ease the traveller to leeward", distractors: ["Bear away to increase apparent wind", "Furl the jib to reduce sail area", "Bear away AND Furl the jib"]},
+            {question: "In stronger winds, what is the easiest method to furl a furling jib?", answer: "Bear away to a broad reach and ease the mainsail and jibsheet", distractors: ["Start the engine and head directly into wind", "Head up to a close reach to increase apparent wind", "Point of sail doesn't matter if you use the winch to furl"]},
+            {question: "After reefing the jib by roller furling, what else should be adjusted?", answer: "Move the jibsheet car forward", distractors: ["Ease the halyard when furling the jib", "Move the jibsheet car aft", "Trim the jibsheet harder"]},
+            {question: "To reach an upwind destination in open water, you should tack:", answer: "When the opposite tack will result in a course that is closer to the destination", distractors: ["As often as possible to keep the crew busy", "Only when absolutely necessary", "Only to avoid stand-on traffic"]},
+            {question: "You are sailing upwind in light air and wind speed increases to moderate. What mainsail adjustments might you make?", answer: "Tighten the outhaul, tighten the halyard/cunningham, and ease the traveller", distractors: ["Ease the outhaul and tighten the backstay", "Ease the cunningham and tighten the traveller", "Tighten the backstay only"]},
+            {question: "The intersection of two or more Lines of Position is called:", answer: "Fix", distractors: ["Estimated Position", "Waypoint", "Dead Reckoning position"]},
+            {question: "To measure distance on a Mercator chart, use:", answer: "Latitude scale, where 1 minute = 1 nm", distractors: ["Latitude scale, where 1 degree = 1 nm", "Longitude scale, where 1 degree = 1 nm", "Longitude scale, where 1 minute = 1 nm"]},
+            {question: "Distance between Waypoints A and B is 7.5 nm. Departing A at 0900, you arrive at B at 1015. What was your Speed over Ground?", answer: "6.0 kts", distractors: ["5.5 kts", "6.5 kts", "7.5 kts"]},
+            {question: "You sail on port tack from C to D at heading 020M but find yourself one mile right of course at halfway. What is the most likely reason?", answer: "Leeway and current set you east of your desired course", distractors: ["You didn't account for Variation when steering 020M", "You didn't account for Deviation when steering 020M", "Leeway and current set you west of your desired course"]},
+            {question: "Your boat has a 5' draft with 1' safety margin. Chart shows 4' minimum on sandbar at MLLW. When can you enter the harbor?", answer: "When the tide exceeds 2' above datum", distractors: ["Only during a Neap Low Tide", "When the tide exceeds 1' above datum", "Never, your boat's draft is too deep"]},
+            {question: "Soundings on a nautical chart are referenced from a vertical datum, and may be expressed in these units:", answer: "Feet, Meters, Fathoms", distractors: ["Meters, Fathoms, Leagues", "Kilometers, Nautical Miles", "Leagues, Kilometers"]},
+            {question: "You plan to take compass bearings on two objects. Object A is off your bow, Object B is off your beam. How should you organize?", answer: "Shoot B at fix time, then shoot A as soon as possible later", distractors: ["Shoot A one minute before fix time, then shoot B one minute after", "Shoot A at fix time, then shoot B as soon as possible later", "Shoot B one minute before fix time, then shoot A one minute after"]},
+            {question: "Which speed would allow you to calculate the most accurate ETA to a waypoint?", answer: "Speed Over Ground", distractors: ["Boat Speed", "Apparent Wind Speed", "True Wind Speed"]},
+            {question: "What is the tidal range if high tide is 10' and low tide is 0.45'?", answer: "9.55'", distractors: ["10.00'", "8.80'", "8.31'"]},
+            {question: "At which time would you expect the greatest rate of tidal change — mid-cycle between high and low tide?", answer: "Mid-cycle (approximately halfway between high and low)", distractors: ["At high tide", "At low tide", "Just after high tide"]},
+            {question: "What type of tidal current would you expect during a rising tide?", answer: "Flood", distractors: ["Ebb", "Slack", "Stand"]},
+            {question: "Your COG is 090T and you see a black and yellow buoy with 2 black triangles pointed up dead ahead. What should you do?", answer: "Turn to port, safe water is north", distractors: ["Reverse direction immediately, isolated danger ahead", "Turn to starboard, safe water is south", "Maintain your heading, but avoid this weather buoy"]},
+            {question: "You are entering a harbor (IALA B) and see a red and green banded buoy with red as topmost band. How do you treat it?", answer: "Preferred channel mark, keep it to starboard", distractors: ["Preferred channel mark, keep it to port", "Safe water mark, deep water on either side", "Isolated danger mark, keep it to port"]},
+            {question: "What Aid to Navigation does Fl R 4s describe?", answer: "A lighted red buoy flashing red every 4 seconds", distractors: ["A red day beacon", "A lighted fixed beacon flashing red every 4 seconds", "A lighted red buoy flashing red 4 times per second"]},
+            {question: "The navigation light that combines sidelights and stern light at the top of the mast is called the:", answer: "Tricolor light", distractors: ["Anchor light", "360° light", "Offshore light"]},
+            {question: "The arc covered by a steaming light on a sailboat under power is:", answer: "225 degrees", distractors: ["112.5 degrees", "235 degrees", "125 degrees"]},
+            {question: "While sailing in fog, you hear a prolonged 5 second blast on a horn. What is your response?", answer: "Continue sounding 1 prolonged, 2 short blasts and pay extra vigilance", distractors: ["Continue your course, you are stand on vessel", "Start your engine and turn away from the sound", "Listen carefully for another sound"]},
+            {question: "Upon hearing 5 short blasts from another boat close by in restricted visibility, you should:", answer: "Look around and assess your best course of action", distractors: ["Immediately respond with 5 short blasts", "Turn to port and acknowledge the boat", "Engage reverse and stop your boat"]},
+            {question: "While motoring down a channel, an approaching boat sounds 1 short blast. What should you do?", answer: "Sound 1 short blast and alter course to starboard to pass port to port", distractors: ["Nothing, he intends to pass to your port side", "Sound 2 short blasts to acknowledge", "Change course to pass starboard to starboard"]},
+            {question: "When sailing at night, you sight a boat with a green over white light. What is it?", answer: "A vessel engaged in trawling", distractors: ["A tug towing a barge", "A pilot boat underway", "A vessel aground"]},
+            {question: "Why should you not leave your tricolor on when your steaming light is illuminated?", answer: "You appear like a fishing vessel", distractors: ["It uses more power", "You appear like a power vessel", "You appear like a vessel in distress"]},
+            {question: "When sailing at night, you see a single white light, which then changes to a single red light. Which statement is correct?", answer: "You are the overtaking boat, you must give way", distractors: ["You are the stand-on boat, you should stay your course", "You are on a collision course with a power boat", "You are the windward boat, you should give way"]},
+            {question: "While motoring past the marina, you hear 3 short blasts from another boat. What does this mean?", answer: "A boat is backing away from the dock", distractors: ["Nothing, there is no such recognized signal", "The boat is not under command, keep clear", "You should stop and wait for the all clear signal"]},
+            {question: "Underway at night, you see red and green lights, and two white lights one above the other. What does this mean?", answer: "An approaching vessel of more than 50 meters dead ahead", distractors: ["A tug and tow dead ahead", "A vessel at anchor", "A power vessel crossing your bow from port to starboard"]},
+            {question: "You are crossing a Traffic Separation Scheme in a sailboat. Which is correct?", answer: "Cross at right angles, as quickly as possible", distractors: ["Sailboats are prohibited from crossing", "Only cross under power", "Only cross after permission is granted"]},
+            {question: "You are under sail on starboard tack and realize a collision with a port tack boat is imminent. What is your appropriate action?", answer: "Take whatever action is necessary to avoid a collision", distractors: ["Maintain course and speed regardless", "Maintain that you have right of way and stand on", "Tack immediately and keep to leeward"]},
+            {question: "You are motor sailing and a sport-fishing boat is crossing from your starboard side. What should you do?", answer: "Give way early and turn to cross behind the sport-fisher", distractors: ["Stand-on, you have sails up", "Give way and turn hard to port", "Sound 5 short blasts"]}
+        ];
+
+        let currentQuestion = null;
+        let questionTimer = 0;
+        let questionTimerInterval = null;
+
+        function getRandomQuestion() {
+            return questionBank[Math.floor(Math.random() * questionBank.length)];
+        }
+
+        function showQuestionOverlay() {
+            if (document.getElementById('questionOverlay').classList.contains('active')) return;
+
+            currentQuestion = getRandomQuestion();
+            document.getElementById('questionOverlay').classList.add('active');
+
+            document.getElementById('questionText').textContent = currentQuestion.question;
+
+            const answers = [currentQuestion.answer, ...currentQuestion.distractors];
+            const shuffled = answers.sort(() => Math.random() - 0.5);
+
+            const grid = document.getElementById('answersGrid');
+            grid.innerHTML = '';
+
+            shuffled.forEach(answer => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.textContent = answer;
+                btn.onclick = () => answerQuestion(answer, btn);
+                grid.appendChild(btn);
+            });
+
+            startQuestionTimer();
+        }
+
+        function startQuestionTimer() {
+            questionTimer = 15;
+            const timerEl = document.getElementById('questionTimer');
+            timerEl.textContent = questionTimer;
+            timerEl.classList.remove('warning');
+
+            if (questionTimerInterval) clearInterval(questionTimerInterval);
+
+            questionTimerInterval = setInterval(() => {
+                questionTimer--;
+                timerEl.textContent = questionTimer;
+
+                if (questionTimer <= 5) {
+                    timerEl.classList.add('warning');
+                }
+
+                if (questionTimer <= 0) {
+                    clearInterval(questionTimerInterval);
+                    closeQuestionOverlay(false);
+                }
+            }, 1000);
+        }
+
+        function answerQuestion(answer, buttonEl) {
+            const buttons = document.querySelectorAll('.answer-btn');
+            buttons.forEach(btn => btn.disabled = true);
+
+            const isCorrect = answer === currentQuestion.answer;
+
+            if (isCorrect) {
+                buttonEl.classList.add('correct');
+                gameState.localPlayer.energy = Math.min(gameState.localPlayer.energy + 10, 30);
+
+                if (gameState.ws && gameState.ws.readyState === WebSocket.OPEN) {
+                    gameState.ws.send(JSON.stringify({
+                        type: 'answerResult',
+                        correct: true
+                    }));
+                }
+            } else {
+                buttonEl.classList.add('wrong');
+            }
+
+            clearInterval(questionTimerInterval);
+            setTimeout(() => closeQuestionOverlay(isCorrect), 1500);
+        }
+
+        function closeQuestionOverlay(answered) {
+            document.getElementById('questionOverlay').classList.remove('active');
+        }
+
+        // ==================== GAME MODES ====================
+        function createRoom() {
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('connectingMode').style.display = 'block';
+            document.getElementById('connectingMessage').textContent = 'Creating room...';
+
+            fetch('/create-room', { method: 'POST' })
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('displayRoomCode').textContent = data.roomCode;
+                    document.getElementById('roomCodeDisplay').style.display = 'block';
+
+                    const playerName = document.getElementById('playerNameInput').value || 'Captain';
+                    connectWebSocket(data.roomCode, playerName);
+                })
+                .catch(e => {
+                    console.error('Error creating room:', e);
+                    alert('Error creating room');
+                    location.reload();
+                });
+        }
+
+        function joinRoom() {
+            const code = document.getElementById('roomCodeInput').value.toUpperCase();
+            const name = document.getElementById('playerNameInput').value || 'Player';
+
+            if (code.length !== 4) {
+                alert('Please enter a 4-letter room code');
+                return;
+            }
+
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('connectingMode').style.display = 'block';
+            document.getElementById('connectingMessage').textContent = 'Joining room ' + code + '...';
+
+            connectWebSocket(code, name);
+        }
+
+        function leaveRoom() {
+            if (gameState.ws) {
+                gameState.ws.close();
+            }
+            location.reload();
+        }
+
+        function startGame() {
+            if (!gameState.isHost) return;
+
+            const timerDuration = parseInt(document.getElementById('timerSelect').value);
+
+            if (gameState.ws && gameState.ws.readyState === WebSocket.OPEN) {
+                gameState.ws.send(JSON.stringify({
+                    type: 'start',
+                    timerDuration: timerDuration
+                }));
+            }
+        }
+
+        function startGameMode(timerDuration, platformSeed) {
+            gameState.gameActive = true;
+            gameState.gameTimer = timerDuration;
+
+            // Setup canvas
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                generatePlatforms(platformSeed);
+            }
+
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            // Initialize player and start game loop
+            initializeLocalPlayer();
+            generatePlatforms(platformSeed);
+
+            document.getElementById('lobbyScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+
+            // Start countdown timer
+            updateGameTimer();
+            const timerInterval = setInterval(() => {
+                gameState.gameTimer--;
+                updateGameTimer();
+
+                if (gameState.gameTimer <= 0) {
+                    clearInterval(timerInterval);
+                    gameState.gameActive = false;
+                    // Server will send gameOver
+                }
+            }, 1000);
+
+            // Start game loop
+            gameLoop();
+        }
+
+        function updateGameTimer() {
+            const mins = Math.floor(gameState.gameTimer / 60);
+            const secs = gameState.gameTimer % 60;
+            document.getElementById('timerDisplay').textContent =
+                mins + ':' + (secs < 10 ? '0' : '') + secs;
+        }
+
+        function endGame(standings) {
+            gameState.gameActive = false;
+            if (gameLoopId) cancelAnimationFrame(gameLoopId);
+
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('resultsScreen').classList.add('active');
+
+            if (standings && standings.length > 0) {
+                const highest = standings[0];
+                document.getElementById('highestClimber').textContent = highest.name;
+
+                let html = '';
+                const medals = ['🥇', '🥈', '🥉'];
+                standings.forEach((player, index) => {
+                    const medal = medals[index] || '⭐';
+                    html += `<div class="standing">
+                        <div class="standing-medal">${medal}</div>
+                        <div class="standing-info">
+                            <div class="standing-name">${player.name}</div>
+                            <div class="standing-height">Height: ${Math.floor(player.heightReached)}m</div>
+                        </div>
+                    </div>`;
+                });
+                document.getElementById('standingsList').innerHTML = html;
+            }
+
+            createConfetti();
+        }
+
+        function createConfetti() {
+            const items = ['🎉', '⛵', '💨', '🏆', '✨'];
+            for (let i = 0; i < 30; i++) {
+                const el = document.createElement('div');
+                el.className = 'confetti';
+                el.textContent = items[Math.floor(Math.random() * items.length)];
+                el.style.left = Math.random() * 100 + '%';
+                el.style.animationDelay = Math.random() * 0.5 + 's';
+                document.body.appendChild(el);
+
+                setTimeout(() => el.remove(), 3500);
+            }
+        }
+
+        function backToLobby() {
+            location.reload();
+        }
+
+        // Canvas roundRect polyfill
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+                if (w < 2 * r) r = w / 2;
+                if (h < 2 * r) r = h / 2;
+                this.beginPath();
+                this.moveTo(x + r, y);
+                this.arcTo(x + w, y, x + w, y + h, r);
+                this.arcTo(x + w, y + h, x, y + h, r);
+                this.arcTo(x, y + h, x, y, r);
+                this.arcTo(x, y, x + w, y, r);
+                this.closePath();
+            };
+        }
+    </script>
+</body>
+</html>
